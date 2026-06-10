@@ -92,16 +92,6 @@ if (rawBody.includes('"events":[]')) {
   return NextResponse.json({ status: "ok" });
 }
 
-if (!verifySignature(rawBody, signature)) {
-  // ถ้า secret ไม่ถูกตั้งค่า ให้ผ่านไปก่อน
-  const secret = process.env.LINE_CHANNEL_SECRET;
-  if (!secret) {
-    return NextResponse.json({ status: "ok" });
-  }
-  console.warn("[Webhook] Invalid signature");
-  return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-}
-
 
   // 3. Parse body
   let body: LineWebhookBody;
