@@ -83,6 +83,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const signature = req.headers.get("x-line-signature") ?? "";
 
   // 2. Verify signature
+if (!rawBody || rawBody === "{}" || !signature) {
+  return NextResponse.json({ status: "ok" });
+}
   if (!verifySignature(rawBody, signature)) {
     console.warn("[Webhook] Invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
