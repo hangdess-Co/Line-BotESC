@@ -86,6 +86,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 if (!rawBody || rawBody === "{}" || !signature) {
   return NextResponse.json({ status: "ok" });
 }
+
+// LINE Verify request มี body แบบนี้
+if (rawBody.includes('"events":[]')) {
+  return NextResponse.json({ status: "ok" });
+}
   if (!verifySignature(rawBody, signature)) {
     console.warn("[Webhook] Invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
