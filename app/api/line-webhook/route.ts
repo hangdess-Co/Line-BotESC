@@ -1,5 +1,6 @@
 export const runtime = "nodejs";
-// app/api/line-webhook/route.ts
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from "next/server";
 import { fetchFaq, faqToPromptString } from "@/lib/sheet";
 import { buildPrompt, DEFAULT_REPLY, NO_FAQ_REPLY } from "@/lib/prompt";
@@ -34,35 +35,6 @@ async function replyToLine(replyToken: string, text: string): Promise<void> {
   }
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const rawBody = await req.text();
-
-  // ตอบ 200 ทันทีสำหรับ LINE Verify และ empty events
-  if (!rawBody || rawBody.includes('"events":[]')) {
-    return NextResponse.json({ status: "ok" });
-  }
-
-  let body: LineWebhookBody;
-  try {
-    body = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  for (const event of body.events) {
-    if (event.type !== "message" || event.message?.type !== "text") continue;
-    const replyToken = event.replyToken;
-    const userMessage = event.message?.text ?? "";
-    if (!replyToken || !userMessage.trim()) continue;
-    console.log("[Webhook] User message:", userMessage);
-    handleMessage(replyToken, userMessage).catch((err) =>
-      console.error("[Webhook] handleMessage error:", err)
-    );
-  }
-
-  return NextResponse.json({ status: "ok" });
-}
-
 async function handleMessage(replyToken: string, userMessage: string): Promise<void> {
   let replyText = DEFAULT_REPLY;
   try {
@@ -87,6 +59,37 @@ async function handleMessage(replyToken: string, userMessage: string): Promise<v
   } catch (err) {
     console.error("[Webhook] Failed to reply to LINE:", err);
   }
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const rawBody = await req.text();
+
+  if (!rawBody || rawBody.includes('"events":[]')) {
+    return NextResponse.json({ status: "ok" });
+  }
+
+  let body: LineWebhookBody;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  // Process all text message events and wait for completion
+  const promises: Promise<void>[] = [];
+  for (const event of body.events) {
+    if (event.type !== "message" || event.message?.type !== "text") continue;
+    const replyToken = event.replyToken;
+    const userMessage = event.message?.text ?? "";
+    if (!replyToken || !userMessage.trim()) continue;
+    console.log("[Webhook] User message:", userMessage);
+    promises.push(handleMessage(replyToken, userMessage));
+  }
+
+  // Wait for all messages to be handled
+  await Promise.allSettled(promises);
+
+  return NextResponse.json({ status: "ok" });
 }
 
 export async function GET(): Promise<NextResponse> {
