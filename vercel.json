@@ -1,7 +1,1 @@
-{
-  "functions": {
-    "app/api/line-webhook/route.ts": {
-      "runtime": "nodejs20.x"
-    }
-  }
-}
+{}
