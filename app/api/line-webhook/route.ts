@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 // app/api/line-webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { fetchFaq, faqToPromptString } from "@/lib/sheet";
