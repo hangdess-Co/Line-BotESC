@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import { fetchFaq, faqToPromptString } from "@/lib/sheet";
 import { buildPrompt, DEFAULT_REPLY, NO_FAQ_REPLY } from "@/lib/prompt";
-import { callGemini } from "@/lib/gemini";
+import { askGemini } from "@/lib/gemini";
 
 const LINE_REPLY_URL = "https://api.line.me/v2/bot/message/reply";
 
@@ -48,7 +48,7 @@ async function handleMessage(replyToken: string, userMessage: string): Promise<v
       return;
     }
     const prompt = buildPrompt(faqContent, userMessage);
-    replyText = await callGemini(prompt);
+    replyText = await askGemini(prompt);
   } catch (err) {
     console.error("[Webhook] Unexpected error:", err);
     replyText = DEFAULT_REPLY;
