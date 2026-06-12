@@ -1,12 +1,5 @@
 // lib/prompt.ts
-// สร้าง System Prompt ตาม Google Official Structure
 
-/**
- * buildSystemPrompt
- * @param faqContent - string ที่ได้จาก faqToPromptString()
- * @param userMessage - ข้อความที่ลูกค้าส่งมา
- * @returns prompt string พร้อมส่ง Gemini
- */
 export function buildPrompt(faqContent: string, userMessage: string): string {
   return `
 <role>
@@ -50,17 +43,11 @@ ${userMessage}
 `.trim();
 }
 
-/**
- * default reply สำหรับกรณีที่ระบบมีปัญหา หรือ Gemini ตอบไม่สมบูรณ์
- */
 export const DEFAULT_REPLY =
   "ขออภัยนะคะ ตอนนี้ระบบ ChatBot ของเรามีปัญหาเล็กน้อย 🙏 ทีมงานจะติดต่อกลับโดยเร็วที่สุดเลยค่ะ";
 
-/**
- * default reply สำหรับกรณีที่ไม่มีข้อมูล FAQ เลย (Sheet โหลดไม่ได้ตั้งแต่ต้น)
- */
-export const NO_FAQ_REPLY =
-  "ท่านสามารถแจ้งปัญหาการใช้งานหรือสอบถามได้เลยครับ เราจะรีบแจ้งเจ้าหน้าที่ให้ติดต่อกลับโดยเร็วที่สุด😊
+// ✅ แก้จาก " " เป็น backtick ` ` เพื่อรองรับ multiline string
+export const NO_FAQ_REPLY = `ท่านสามารถแจ้งปัญหาการใช้งานหรือสอบถามได้เลยครับ เราจะรีบแจ้งเจ้าหน้าที่ให้ติดต่อกลับโดยเร็วที่สุด😊
 
 - รายละเอียดปัญหาที่พบ
 - ชื่อ - นามสกุล
@@ -71,4 +58,4 @@ export const NO_FAQ_REPLY =
 หรือท่านสามารถติดต่อเราได้ผ่านช่องทางโทรศัพท์และ email ดังนี้
 
 Email : empservice@thaibev.com
-Tel. 02-078-5858";
+Tel. 02-078-5858`;
